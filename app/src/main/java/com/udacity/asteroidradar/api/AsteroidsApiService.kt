@@ -18,9 +18,7 @@ import retrofit2.http.Query
 interface ApiService {
     @GET("neo/rest/v1/feed")
     suspend fun getData(
-        @Query("start_date") start_date: String,
-        @Query("end_date") end_date: String,
-        @Query("api_key") apiKey: String,
+        @Query("api_key") apiKey: String
     ): String
 }
 
@@ -54,5 +52,5 @@ object Network {
         return httpClient.build()
     }
 
-    val asteroids = retrofit.create(ApiService::class.java)
+    val asteroids: ApiService = retrofit.create(ApiService::class.java)
 }
