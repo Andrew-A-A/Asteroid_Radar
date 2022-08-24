@@ -4,6 +4,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.udacity.asteroidradar.Constants.API_KEY
 import com.udacity.asteroidradar.Database.AsteroidDatabase
 import com.udacity.asteroidradar.api.Network
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
@@ -13,7 +14,7 @@ import org.json.JSONObject
 
 class DataRepository(private val database: AsteroidDatabase) {
     val asteroids : LiveData<List<Asteroid>> = database.asteroidDao.getAsteroids()
-
+    val pictureOfDay= MutableLiveData<PictureOfDay>()
 
 
     suspend fun refreshAsteroids(){
@@ -24,7 +25,7 @@ class DataRepository(private val database: AsteroidDatabase) {
                 JSONObject(
                     Network
                         .asteroids
-                        .getData(Constants.API_KEY)
+                        .getData(API_KEY)
                 )
             )
             Log.i("Called arr size ",asteroids.size.toString())
@@ -38,5 +39,39 @@ class DataRepository(private val database: AsteroidDatabase) {
         database.asteroidDao.insertAsteroids(asteroids)
         }
 
+    }
+    suspend fun refreshAsteroids(startDate:String, endDate:String){
+
+        withContext(Dispatchers.IO)
+        {
+           val asteroids = parseAsteroidsJsonResult(
+                JSONObject(
+                    Network
+                        .asteroids
+                        .getData(startDate,endDate,API_KEY)
+                )
+            )
+            Log.i("Called arr size ",asteroids.size.toString())
+
+         database.asteroidDao.delete()
+        database.asteroidDao.insertAsteroids(asteroids)
+        }
+
+    }
+
+    suspend fun refreshPictureOfDay(){
+        val pictureOfDay= withContext(Dispatchers.IO){
+            val pictureOfDay= Network.asteroids.getPictureOfDay(API_KEY)
+            if(pictureOfDay.media_type=="image")
+            return@withContext pictureOfDay
+            else
+                return@withContext null
+        }
+        pictureOfDay.let {
+            this.pictureOfDay.value=it
+        }
+    }
+    fun getCachedPictureOfDay(url:String,title:String){
+        pictureOfDay.value= PictureOfDay("image",title,url)
     }
 }

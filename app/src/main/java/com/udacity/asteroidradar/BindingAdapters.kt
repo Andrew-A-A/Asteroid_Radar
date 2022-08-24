@@ -4,8 +4,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
 import com.udacity.asteroidradar.main.AsteroidsAdapter
 
+
+@BindingAdapter("podSrc")
+fun bindPictureOfToday(imageView: ImageView, url: String?) {
+    Picasso.get().load(url).into(imageView)
+}
 
 @BindingAdapter("listData")
 fun bindRecyclerView(recyclerView: RecyclerView, data: List<Asteroid>?) {

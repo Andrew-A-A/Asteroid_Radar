@@ -1,19 +1,28 @@
 package com.udacity.asteroidradar.main
 
 import android.app.Application
+import android.content.Context
+
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.udacity.asteroidradar.Asteroid
+
 import com.udacity.asteroidradar.DataRepository
 import com.udacity.asteroidradar.Database.getDatabase
+import com.udacity.asteroidradar.PictureOfDay
 import kotlinx.coroutines.launch
-import java.lang.Exception
+
+import kotlin.Exception
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-    private val database= getDatabase(application)
-    private val repository= DataRepository(database)
+    val database= getDatabase(application)
+     val repository= DataRepository(database)
+    var sharedPreferences=application.getSharedPreferences("PodCache", Context.MODE_PRIVATE)
+        var pictureOfDayCache=sharedPreferences.edit()
+       // lateinit var today :String
+       // lateinit var next77Days : String
+
     // Internally, we use a MutableLiveData, because we will be updating the List of Asteroids
     // with new values
    // private var _asteroids = MutableLiveData<ArrayList<Asteroid>>()
@@ -49,26 +58,46 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun refreshData(){
+       // getTodayAndNext7()
         viewModelScope.launch {
             try {
-               repository.refreshAsteroids()
+                repository.refreshAsteroids()
+            //   repository.refreshAsteroids(today,next77Days)
+
             }
             catch (e: Exception){
-//                _asteroids.value= arrayListOf(
-//                    Asteroid(1,"ERROR",
-//                        "00/00/0000",
-//                        0.0,
-//                        0.0,
-//                        0.0,
-//                        0.0,
-//                        true))
                 e.printStackTrace()
+            }
+
+            try {
+                repository.refreshPictureOfDay()
+                repository.pictureOfDay.value?.let { cachePictureOfDay(it) }
+            }
+            catch (e:Exception){
+                sharedPreferences.getString("URL","")?.let {
+                    repository.getCachedPictureOfDay(it,
+                        sharedPreferences.getString("Description","")!!
+                    ) }
             }
         }
     }
-  val asteroids=repository.asteroids
+    val asteroids=repository.asteroids
+    val pictureOfDay=repository.pictureOfDay
 
+    fun cachePictureOfDay(pictureOfDay: PictureOfDay){
+        pictureOfDayCache.putString("URL",pictureOfDay.url)
+        pictureOfDayCache.putString("Description",pictureOfDay.title)
+        pictureOfDayCache.apply()
+    }
 
-
-
+//    fun getTodayAndNext7(){
+//        val calendar = java.util.Calendar.getInstance()
+//
+//        val dateFormat = SimpleDateFormat(Constants.API_QUERY_DATE_FORMAT, Locale.getDefault())
+//        today = dateFormat.format(calendar)
+//        calendar.add(java.util.Calendar.DAY_OF_YEAR, 7)
+//        val lastTime = calendar.time
+//        next77Days = dateFormat.format(calendar)}
+//
+//
 }

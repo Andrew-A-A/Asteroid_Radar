@@ -36,12 +36,10 @@
             android:textColor="#ffffff"
             android:textSize="18sp"
             app:layout_constraintEnd_toStartOf="@+id/is_hazardous"
-
             app:layout_constraintHorizontal_bias="0.076"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="6834 (2001 KB67)" />
-
         <TextView
             android:id="@+id/date"
             android:layout_width="wrap_content"

@@ -4,6 +4,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.udacity.asteroidradar.BuildConfig
 import com.udacity.asteroidradar.Constants.BASE_URL
+import com.udacity.asteroidradar.PictureOfDay
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -20,6 +21,16 @@ interface ApiService {
     suspend fun getData(
         @Query("api_key") apiKey: String
     ): String
+    @GET("neo/rest/v1/feed")
+    suspend fun getData(
+        @Query("start_date") startDate: String,
+        @Query("end_date")  endDate: String,
+        @Query("api_key") apiKey: String
+    ): String
+    @GET("planetary/apod")
+    suspend fun getPictureOfDay(
+        @Query("api_key") apiKey: String
+    ):PictureOfDay
 }
 
 /**
