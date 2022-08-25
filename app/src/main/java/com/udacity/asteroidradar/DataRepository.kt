@@ -1,7 +1,7 @@
 package com.udacity.asteroidradar
 
 import android.util.Log
-import android.widget.Toast
+
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.udacity.asteroidradar.Constants.API_KEY
@@ -11,13 +11,21 @@ import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class DataRepository(private val database: AsteroidDatabase) {
+    private val current: LocalDateTime = LocalDateTime.now()
+    private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(Constants.API_QUERY_DATE_FORMAT)
+    private val startDate: String =current.format(formatter)
+
     val asteroids : LiveData<List<Asteroid>> = database.asteroidDao.getAsteroids()
+    val asteroidsToday : LiveData<List<Asteroid>> = database.asteroidDao.getTodayAsteroids(startDate)
+
     val pictureOfDay= MutableLiveData<PictureOfDay>()
 
 
-    suspend fun refreshAsteroids(){
+    suspend fun refreshAsteroids(startDate:String){
 
         withContext(Dispatchers.IO)
         {
@@ -25,30 +33,7 @@ class DataRepository(private val database: AsteroidDatabase) {
                 JSONObject(
                     Network
                         .asteroids
-                        .getData(API_KEY)
-                )
-            )
-            Log.i("Called arr size ",asteroids.size.toString())
-
-
-//        asteroids.value= arrayListOf(
-//            Asteroid(1,"Test","10/01/2020",123.2323,1313.21313,12313.123123,131.12313,true)
-//            , Asteroid(2,"Test2","10/12/2020",123.2323,1313.21313,12313.123123,131.12313,false),
-//            Asteroid(2,"Test3","01/01/2022",123.2323,1313.21313,12313.123123,131.12313,true)
-         database.asteroidDao.delete()
-        database.asteroidDao.insertAsteroids(asteroids)
-        }
-
-    }
-    suspend fun refreshAsteroids(startDate:String, endDate:String){
-
-        withContext(Dispatchers.IO)
-        {
-           val asteroids = parseAsteroidsJsonResult(
-                JSONObject(
-                    Network
-                        .asteroids
-                        .getData(startDate,endDate,API_KEY)
+                        .getData(startDate,API_KEY)
                 )
             )
             Log.i("Called arr size ",asteroids.size.toString())

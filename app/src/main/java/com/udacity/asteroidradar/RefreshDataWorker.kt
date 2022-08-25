@@ -1,5 +1,4 @@
 package com.udacity.asteroidradar
 
-class repository {
-
+class RefreshDataWorker {
 }

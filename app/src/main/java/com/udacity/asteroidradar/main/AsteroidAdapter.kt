@@ -8,7 +8,7 @@ import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.databinding.AsteroidItemBinding
 
 // RecyclerView Adapter for setting up data binding on the items in list.
-class AsteroidsAdapter(val onClickListener: OnClickListener):
+class AsteroidsAdapter(private val onClickListener: OnClickListener):
     ListAdapter<Asteroid,AsteroidsAdapter.AsteroidsViewHolder>(DiffCallback){
 
     //ViewHolder for Asteroid items  (All work is done by data binding)

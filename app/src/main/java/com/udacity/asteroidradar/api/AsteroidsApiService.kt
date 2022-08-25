@@ -17,14 +17,10 @@ import retrofit2.http.Query
  * A retrofit service to fetch NASA data.
  */
 interface ApiService {
-    @GET("neo/rest/v1/feed")
-    suspend fun getData(
-        @Query("api_key") apiKey: String
-    ): String
+
     @GET("neo/rest/v1/feed")
     suspend fun getData(
         @Query("start_date") startDate: String,
-        @Query("end_date")  endDate: String,
         @Query("api_key") apiKey: String
     ): String
     @GET("planetary/apod")

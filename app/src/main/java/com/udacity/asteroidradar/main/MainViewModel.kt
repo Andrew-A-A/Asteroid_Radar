@@ -2,34 +2,37 @@ package com.udacity.asteroidradar.main
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
+import android.util.Log
+
 
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.udacity.asteroidradar.Asteroid
+import com.udacity.asteroidradar.Constants.API_QUERY_DATE_FORMAT
 
 import com.udacity.asteroidradar.DataRepository
 import com.udacity.asteroidradar.Database.getDatabase
 import com.udacity.asteroidradar.PictureOfDay
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 import kotlin.Exception
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-    val database= getDatabase(application)
-     val repository= DataRepository(database)
-    var sharedPreferences=application.getSharedPreferences("PodCache", Context.MODE_PRIVATE)
-        var pictureOfDayCache=sharedPreferences.edit()
-       // lateinit var today :String
-       // lateinit var next77Days : String
+    var filter= MutableLiveData(Filter.ALL)
 
-    // Internally, we use a MutableLiveData, because we will be updating the List of Asteroids
-    // with new values
-   // private var _asteroids = MutableLiveData<ArrayList<Asteroid>>()
+    private val database= getDatabase(application)
+    private val repository= DataRepository(database)
+    private var sharedPreferences: SharedPreferences =application.getSharedPreferences("PodCache", Context.MODE_PRIVATE)
+    private var pictureOfDayCache: SharedPreferences.Editor =sharedPreferences.edit()
 
-    // The external LiveData interface to the asteroid is immutable, so only this class can modify
-//    val asteroids: LiveData<ArrayList<Asteroid>>
-//        get() = _asteroids
+    private val current: LocalDateTime =LocalDateTime.now()
+    private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(API_QUERY_DATE_FORMAT)
+    private val startDate: String =current.format(formatter)
+
 
     private val _navigateToSelectedAsteroid =MutableLiveData<Asteroid?>()
     val navigateToSelectedAsteroid: MutableLiveData<Asteroid?>
@@ -40,14 +43,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
    init {
                 refreshData()
     }
-//init {
-//    _asteroids.value= arrayListOf(
-//        Asteroid(1,"Test","10/01/2020",123.2323,1313.21313,12313.123123,131.12313,true)
-//        , Asteroid(2,"Test2","10/12/2020",123.2323,1313.21313,12313.123123,131.12313,false),
-//        Asteroid(2,"Test3","01/01/2022",123.2323,1313.21313,12313.123123,131.12313,true)
-//    )
-//
-//}
 
     fun displayAsteroidDetails(asteroid: Asteroid) {
         _navigateToSelectedAsteroid.value = asteroid
@@ -58,14 +53,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun refreshData(){
-       // getTodayAndNext7()
+        Log.i("start Date ",startDate)
         viewModelScope.launch {
             try {
-                repository.refreshAsteroids()
-            //   repository.refreshAsteroids(today,next77Days)
+                repository.refreshAsteroids(startDate)
 
             }
             catch (e: Exception){
+                Log.i("err","No internet")
                 e.printStackTrace()
             }
 
@@ -81,10 +76,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
     val asteroids=repository.asteroids
+    val asteroidsToday=repository.asteroidsToday
     val pictureOfDay=repository.pictureOfDay
 
-    fun cachePictureOfDay(pictureOfDay: PictureOfDay){
+    private fun cachePictureOfDay(pictureOfDay: PictureOfDay){
         pictureOfDayCache.putString("URL",pictureOfDay.url)
         pictureOfDayCache.putString("Description",pictureOfDay.title)
         pictureOfDayCache.apply()
