@@ -47,10 +47,7 @@ class DataRepository(private val database: AsteroidDatabase) {
     suspend fun refreshPictureOfDay(){
         val pictureOfDay= withContext(Dispatchers.IO){
             val pictureOfDay= Network.asteroids.getPictureOfDay(API_KEY)
-            if(pictureOfDay.media_type=="image")
             return@withContext pictureOfDay
-            else
-                return@withContext null
         }
         pictureOfDay.let {
             this.pictureOfDay.value=it

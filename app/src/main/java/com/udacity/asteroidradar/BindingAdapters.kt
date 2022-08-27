@@ -10,7 +10,7 @@ import com.udacity.asteroidradar.main.AsteroidsAdapter
 
 @BindingAdapter("podSrc")
 fun bindPictureOfToday(imageView: ImageView, url: String?) {
-    Picasso.get().load(url).into(imageView)
+    Picasso.get().load(url).error(R.drawable.placeholder_picture_of_day).into(imageView)
 }
 
 @BindingAdapter("listData")
